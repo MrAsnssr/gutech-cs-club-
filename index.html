@@ -372,6 +372,21 @@
                 </div>
                 <button type="submit" class="btn btn-primary">Save Settings</button>
             </form>
+
+            <hr>
+
+            <h3>Create a New Vote</h3>
+            <form id="createVoteForm">
+                <div class="form-group">
+                    <label for="voteQuestion">Question</label>
+                    <input type="text" id="voteQuestion" name="voteQuestion" required>
+                </div>
+                <div class="form-group">
+                    <label for="voteOptions">Options (comma-separated)</label>
+                    <input type="text" id="voteOptions" name="voteOptions" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Vote</button>
+            </form>
         </div>
     </div>
 
@@ -541,11 +556,31 @@
         </div>
     </div>
 
+    <!-- Voting Modal -->
+    <div id="votingModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeVotingModal()">&times;</span>
+            <h2 id="votingQuestion"></h2>
+            <div id="votingOptions"></div>
+            <button id="castVoteBtn" class="btn btn-primary">Cast Vote</button>
+        </div>
+    </div>
+
+    <!-- Vote Results Modal -->
+    <div id="voteResultsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeVoteResultsModal()">&times;</span>
+            <h2 id="voteResultsQuestion"></h2>
+            <div id="voteResults"></div>
+        </div>
+    </div>
+
     <script src="firebase-config.js"></script>
     <script src="auth.js"></script>
     <script src="shop.js"></script>
     <script src="admin.js"></script>
     <script src="theme.js"></script>
+    <script src="voting.js"></script>
     
     <div class="theme-switcher-floating">
         <input type="checkbox" id="themeToggle" class="theme-toggle-checkbox">
