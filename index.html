@@ -1,0 +1,617 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>GUtech - Computer Science Club</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+</head>
+<body>
+    <!-- User Login/Register Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAuthModal()">&times;</span>
+            <h2 id="authModalTitle">Login to Your Account</h2>
+            
+            <!-- Login Form -->
+            <form id="loginForm" style="display: block;">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                </div>
+                <div id="loginError" class="error-message"></div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <p class="auth-switch">Don't have an account? <a href="#" onclick="switchToRegister()">Register here</a></p>
+            </form>
+            
+            <!-- Register Form -->
+            <form id="registerForm" style="display: none;">
+                <div class="form-group">
+                    <label for="registerName">Full Name</label>
+                    <input type="text" id="registerName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" name="password" required minlength="6">
+                </div>
+                <div id="registerError" class="error-message"></div>
+                <button type="submit" class="btn btn-primary">Create Account</button>
+                <p class="auth-switch">Already have an account? <a href="#" onclick="switchToLogin()">Login here</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Panel (when logged in) -->
+    <div id="userPanel" class="admin-panel" style="display: none;">
+        <div class="admin-controls">
+            <span class="admin-badge" id="userNameDisplay">User</span>
+            <button id="viewOrdersBtn" class="btn btn-small admin-only" style="display: none;">📦 Orders</button>
+            <button id="userLogoutBtn" class="btn btn-small">Logout</button>
+        </div>
+    </div>
+
+    <!-- Shopping Cart Modal -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content cart-modal-content">
+            <span class="close" onclick="closeCartModal()">&times;</span>
+            <h2>Shopping Cart</h2>
+            <div id="cartItems" class="cart-items"></div>
+            <div class="cart-total">
+                <h3>Total: <span id="cartTotal">0</span> OMR</h3>
+            </div>
+            <div class="cart-actions">
+                <button class="btn btn-secondary" onclick="closeCartModal()">Continue Shopping</button>
+                <button class="btn btn-primary" onclick="proceedToCheckout()">Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCheckoutModal()">&times;</span>
+            <h2>Checkout</h2>
+            <form id="checkoutForm">
+                <div class="form-group">
+                    <label for="checkoutName">Full Name</label>
+                    <input type="text" id="checkoutName" required>
+                </div>
+                <div class="form-group">
+                    <label for="checkoutEmail">Email</label>
+                    <input type="email" id="checkoutEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="checkoutPhone">Phone Number</label>
+                    <input type="tel" id="checkoutPhone" required>
+                </div>
+                <div class="form-group">
+                    <label for="checkoutAddress">Delivery Address</label>
+                    <textarea id="checkoutAddress" rows="3" required></textarea>
+                </div>
+                <div class="checkout-summary">
+                    <h3>Order Summary</h3>
+                    <div id="checkoutItems"></div>
+                    <div class="checkout-total">
+                        <strong>Total: <span id="checkoutTotal">0</span> OMR</strong>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Place Order</button>
+            </form>
+        </div>
+    </div>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <div class="logo-content">
+                    <h1 class="logo-text">GUtech</h1>
+                    <p class="logo-subtitle">RWTH AACHEN</p>
+                </div>
+                <div class="university-name">
+                    <p class="english-text">German University of Technology in Oman</p>
+                </div>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="#home" class="nav-link">Home</a></li>
+                    <li><a href="#past-events" class="nav-link">Past Events</a></li>
+                    <li><a href="#gallery" class="nav-link">Gallery</a></li>
+                    <li><a href="#merch" class="nav-link">Merch</a></li>
+                    <li><a href="#registration" class="nav-link">Registration</a></li>
+                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                    <li id="loginNavItem"><a href="#" id="userAuthBtn" class="user-auth-btn">👤 Login</a></li>
+                    <li id="logoutNavItem" style="display: none;"><a href="#" id="navLogoutBtn" class="logout-btn">🚪 Logout</a></li>
+                    <li><a href="#" id="cartBtn" class="cart-btn">🛒 <span id="cartCount">0</span></a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <p class="hero-subtitle">computer Science Club</p>
+            <h2 class="hero-title">Welcomes You</h2>
+            <div class="hero-buttons">
+                <a href="#explore" class="btn btn-primary">Explore</a>
+                <a href="#contact" class="btn btn-secondary">Contact us</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="explore" class="section about-section">
+        <div class="container">
+            <h2 class="section-title">About the Computer Science Club</h2>
+            <p class="section-text">
+                Welcome to the GUtech Computer Science Club! We are a vibrant community of students passionate about technology, 
+                innovation, and computer science. Our club provides a platform for students to explore, learn, and collaborate 
+                on exciting projects, attend workshops, and participate in competitions.
+            </p>
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">ðŸ’»</div>
+                    <h3>Workshops</h3>
+                    <p>Regular hands-on workshops on the latest technologies and programming languages</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">ðŸ†</div>
+                    <h3>Competitions</h3>
+                    <p>Participate in coding challenges, hackathons, and technical competitions</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">ðŸ¤</div>
+                    <h3>Networking</h3>
+                    <p>Connect with fellow students, alumni, and industry professionals</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="past-events" class="section events-section">
+        <div class="container">
+            <h2 class="section-title">Past Events 
+                <button class="btn-add admin-only" id="addEventBtn" style="display: none;">+ Add Event</button>
+            </h2>
+            <div class="events-grid" id="eventsGrid">
+                <div class="event-card" data-event-id="1">
+                    <h3 class="event-title">Annual Hackathon 2024</h3>
+                    <p class="event-date">September 2024</p>
+                    <p class="event-description">48-hour coding marathon with amazing prizes and networking opportunities</p>
+                    <div class="admin-only edit-controls" style="display: none;">
+                        <button class="btn-edit" onclick="editEvent(1)">Edit</button>
+                        <button class="btn-delete" onclick="deleteEvent(1)">Delete</button>
+                    </div>
+                </div>
+                <div class="event-card" data-event-id="2">
+                    <h3 class="event-title">AI & Machine Learning Workshop</h3>
+                    <p class="event-date">August 2024</p>
+                    <p class="event-description">Introduction to AI concepts and practical ML implementation</p>
+                    <div class="admin-only edit-controls" style="display: none;">
+                        <button class="btn-edit" onclick="editEvent(2)">Edit</button>
+                        <button class="btn-delete" onclick="deleteEvent(2)">Delete</button>
+                    </div>
+                </div>
+                <div class="event-card" data-event-id="3">
+                    <h3 class="event-title">Web Development Bootcamp</h3>
+                    <p class="event-date">July 2024</p>
+                    <p class="event-description">Full-stack development workshop covering modern frameworks</p>
+                    <div class="admin-only edit-controls" style="display: none;">
+                        <button class="btn-edit" onclick="editEvent(3)">Edit</button>
+                        <button class="btn-delete" onclick="deleteEvent(3)">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="gallery" class="section gallery-section">
+        <div class="container">
+            <h2 class="section-title">Gallery 
+                <button class="btn-add admin-only" id="addGalleryBtn" style="display: none;">+ Add Image</button>
+            </h2>
+            <div class="gallery-grid" id="galleryGrid">
+                <div class="gallery-item" data-gallery-id="1">
+                    <div class="gallery-placeholder">Event Photo 1</div>
+                    <div class="admin-only edit-controls gallery-controls" style="display: none;">
+                        <button class="btn-edit" onclick="editGalleryItem(1)">Edit</button>
+                        <button class="btn-delete" onclick="deleteGalleryItem(1)">Delete</button>
+                    </div>
+                </div>
+                <div class="gallery-item" data-gallery-id="2">
+                    <div class="gallery-placeholder">Event Photo 2</div>
+                    <div class="admin-only edit-controls gallery-controls" style="display: none;">
+                        <button class="btn-edit" onclick="editGalleryItem(2)">Edit</button>
+                        <button class="btn-delete" onclick="deleteGalleryItem(2)">Delete</button>
+                    </div>
+                </div>
+                <div class="gallery-item" data-gallery-id="3">
+                    <div class="gallery-placeholder">Event Photo 3</div>
+                    <div class="admin-only edit-controls gallery-controls" style="display: none;">
+                        <button class="btn-edit" onclick="editGalleryItem(3)">Edit</button>
+                        <button class="btn-delete" onclick="deleteGalleryItem(3)">Delete</button>
+                    </div>
+                </div>
+                <div class="gallery-item" data-gallery-id="4">
+                    <div class="gallery-placeholder">Event Photo 4</div>
+                    <div class="admin-only edit-controls gallery-controls" style="display: none;">
+                        <button class="btn-edit" onclick="editGalleryItem(4)">Edit</button>
+                        <button class="btn-delete" onclick="deleteGalleryItem(4)">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="merch" class="section merch-section">
+        <div class="container">
+            <h2 class="section-title">Club Merch 
+                <button class="btn-add admin-only" id="addProductBtn" style="display: none;">+ Add Product</button>
+                <button class="btn-orders admin-only" id="viewOrdersBtnMain" style="display: none;">📦 View All Orders</button>
+                <button class="btn-my-orders user-only" id="myOrdersBtn" style="display: none;">📋 My Orders</button>
+            </h2>
+            <div class="products-grid" id="productsGrid">
+                <div class="product-card" data-product-id="1">
+                    <div class="product-image">
+                        <div class="product-placeholder">CS Club T-Shirt</div>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">CS Club T-Shirt</h3>
+                        <p class="product-description">Premium cotton t-shirt with GUtech CS Club logo</p>
+                        <div class="product-price">15 OMR</div>
+                        <div class="product-actions">
+                            <select class="size-select">
+                                <option value="">Select Size</option>
+                                <option value="S">Small</option>
+                                <option value="M">Medium</option>
+                                <option value="L">Large</option>
+                                <option value="XL">X-Large</option>
+                            </select>
+                            <button class="btn btn-primary add-to-cart" onclick="addToCart(1, 'CS Club T-Shirt', 15)">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="admin-only edit-controls" style="display: none;">
+                        <button class="btn-edit" onclick="editProduct(1)">Edit</button>
+                        <button class="btn-delete" onclick="deleteProduct(1)">Delete</button>
+                    </div>
+                </div>
+                <div class="product-card" data-product-id="2">
+                    <div class="product-image">
+                        <div class="product-placeholder">Hoodie</div>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">CS Club Hoodie</h3>
+                        <p class="product-description">Comfortable hoodie perfect for late-night coding sessions</p>
+                        <div class="product-price">25 OMR</div>
+                        <div class="product-actions">
+                            <select class="size-select">
+                                <option value="">Select Size</option>
+                                <option value="S">Small</option>
+                                <option value="M">Medium</option>
+                                <option value="L">Large</option>
+                                <option value="XL">X-Large</option>
+                            </select>
+                            <button class="btn btn-primary add-to-cart" onclick="addToCart(2, 'CS Club Hoodie', 25)">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="admin-only edit-controls" style="display: none;">
+                        <button class="btn-edit" onclick="editProduct(2)">Edit</button>
+                        <button class="btn-delete" onclick="deleteProduct(2)">Delete</button>
+                    </div>
+                </div>
+                <div class="product-card" data-product-id="3">
+                    <div class="product-image">
+                        <div class="product-placeholder">Mug</div>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">Programmer's Mug</h3>
+                        <p class="product-description">Coffee mug with coding quotes and club logo</p>
+                        <div class="product-price">8 OMR</div>
+                        <div class="product-actions">
+                            <button class="btn btn-primary add-to-cart" onclick="addToCart(3, 'Programmer\'s Mug', 8)">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="admin-only edit-controls" style="display: none;">
+                        <button class="btn-edit" onclick="editProduct(3)">Edit</button>
+                        <button class="btn-delete" onclick="deleteProduct(3)">Delete</button>
+                    </div>
+                </div>
+                <div class="product-card" data-product-id="4">
+                    <div class="product-image">
+                        <div class="product-placeholder">Stickers</div>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">Sticker Pack</h3>
+                        <p class="product-description">Set of 10 coding-themed vinyl stickers</p>
+                        <div class="product-price">3 OMR</div>
+                        <div class="product-actions">
+                            <button class="btn btn-primary add-to-cart" onclick="addToCart(4, 'Sticker Pack', 3)">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="admin-only edit-controls" style="display: none;">
+                        <button class="btn-edit" onclick="editProduct(4)">Edit</button>
+                        <button class="btn-delete" onclick="deleteProduct(4)">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="registration" class="section registration-section">
+        <div class="container">
+            <h2 class="section-title">Join Us <button id="adminSettingsBtn" class="btn btn-small admin-only" style="display: none;">⚙️ Settings</button></h2>
+            <a href="#" id="registerBtn" class="btn btn-primary" style="display: none;" target="_blank" rel="noopener noreferrer">Register</a>
+            <p id="registrationClosedMsg" style="display: none;">Sorry, registration is closed for now.</p>
+        </div>
+    </section>
+
+    <!-- Admin Settings Modal -->
+    <div id="adminSettingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAdminSettingsModal()">&times;</span>
+            <h2>Admin Settings</h2>
+            <form id="adminSettingsForm">
+                <div class="form-group">
+                    <label for="registrationLink">Registration Link</label>
+                    <input type="text" id="registrationLink" name="registrationLink">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="registrationEnabled"> Enable Registration
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Settings</button>
+            </form>
+        </div>
+    </div>
+
+    <section id="contact" class="section contact-section">
+        <div class="container">
+            <h2 class="section-title">Contact Us</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h3>Get in Touch</h3>
+                    <p><strong>Email:</strong> csclub@gutech.edu.om</p>
+                    <p><strong>Location:</strong> GUtech Campus, Muscat, Oman</p>
+                    <p><strong>Office Hours:</strong> Sunday - Thursday, 9:00 AM - 4:00 PM</p>
+                </div>
+                <div class="contact-form">
+                    <form>
+                        <div class="form-group">
+                            <input type="text" placeholder="Your Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" placeholder="Your Email" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea placeholder="Your Message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 GUtech Computer Science Club. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Edit Event Modal -->
+    <div id="editEventModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditEventModal()">&times;</span>
+            <h2 id="eventModalTitle">Edit Event</h2>
+            <form id="editEventForm">
+                <input type="hidden" id="eventId">
+                <div class="form-group">
+                    <label for="eventTitle">Event Title</label>
+                    <input type="text" id="eventTitle" name="eventTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventDate">Event Date</label>
+                    <input type="text" id="eventDate" name="eventDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventDescription">Description</label>
+                    <textarea id="eventDescription" name="eventDescription" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Event</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Gallery Modal -->
+    <div id="editGalleryModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditGalleryModal()">&times;</span>
+            <h2 id="galleryModalTitle">Edit Gallery Item</h2>
+            <form id="editGalleryForm">
+                <input type="hidden" id="galleryId">
+                <div class="form-group">
+                    <label for="galleryCaption">Caption</label>
+                    <input type="text" id="galleryCaption" name="galleryCaption" required>
+                </div>
+                <div class="form-group">
+                    <label for="galleryImageUrl">Image URL (optional)</label>
+                    <input type="text" id="galleryImageUrl" name="galleryImageUrl" placeholder="Enter image URL or leave blank">
+                </div>
+                <button type="submit" class="btn btn-primary">Save Image</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div id="editProductModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditProductModal()">&times;</span>
+            <h2 id="productModalTitle">Edit Product</h2>
+            <form id="editProductForm">
+                <input type="hidden" id="productId">
+                <div class="form-group">
+                    <label for="productName">Product Name</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="form-group">
+                    <label for="productDescription">Description</label>
+                    <textarea id="productDescription" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="productPrice">Price (OMR)</label>
+                    <input type="number" id="productPrice" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="productImageUrl">Image URL (optional)</label>
+                    <input type="text" id="productImageUrl" placeholder="Enter image URL or leave blank">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="productHasSizes"> Has size options
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Product</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Orders Dashboard Modal (Admin Only) -->
+    <div id="ordersModal" class="modal">
+        <div class="modal-content orders-modal-content">
+            <span class="close" onclick="closeOrdersModal()">&times;</span>
+            <h2>📦 Orders Dashboard</h2>
+            
+            <div class="orders-filters">
+                <div class="orders-stats">
+                    <div class="stat-card">
+                        <h3 id="totalOrders">0</h3>
+                        <p>Total Orders</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="pendingOrders">0</h3>
+                        <p>Pending</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalRevenue">0 OMR</h3>
+                        <p>Total Revenue</p>
+                    </div>
+                </div>
+                
+                <div class="filter-controls">
+                    <select id="orderStatusFilter" onchange="filterOrders()">
+                        <option value="all">All Orders</option>
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="refreshOrders()">🔄 Refresh</button>
+                </div>
+            </div>
+
+            <div id="ordersContainer" class="orders-container">
+                <div class="loading-orders">
+                    <p>Loading orders...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Orders Modal (Regular Users) -->
+    <div id="myOrdersModal" class="modal">
+        <div class="modal-content orders-modal-content">
+            <span class="close" onclick="closeMyOrdersModal()">&times;</span>
+            <h2>📋 My Orders</h2>
+            
+            <div id="myOrdersContainer" class="orders-container">
+                <div class="loading-orders">
+                    <p>Loading your orders...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+    <script src="shop.js"></script>
+    <script src="admin.js"></script>
+    <script src="theme.js"></script>
+    
+    <div class="theme-switcher-floating">
+        <input type="checkbox" id="themeToggle" class="theme-toggle-checkbox">
+        <label for="themeToggle" class="theme-toggle-label">
+            <span class="theme-toggle-inner"></span>
+            <span class="theme-toggle-switch"></span>
+        </label>
+    </div>
+
+    <script>
+        // Navigation active state handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            // Set active state on click
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    // Remove active class from all links
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    // Add active class to clicked link
+                    this.classList.add('active');
+                });
+            });
+            
+            // Optional: Set active based on scroll position
+            const sections = document.querySelectorAll('section[id]');
+            
+            function highlightNav() {
+                let scrollY = window.pageYOffset;
+                
+                sections.forEach(section => {
+                    const sectionHeight = section.offsetHeight;
+                    const sectionTop = section.offsetTop - 100;
+                    const sectionId = section.getAttribute('id');
+                    
+                    if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === '#' + sectionId) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+                
+                // If at top of page, highlight Home
+                if (scrollY < 100) {
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === '#home') {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            }
+            
+            // Set Home as active on page load
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === '#home') {
+                    link.classList.add('active');
+                }
+            });
+            
+            // Update active state on scroll
+            window.addEventListener('scroll', highlightNav);
+        });
+    </script>
+</body>
+</html>
