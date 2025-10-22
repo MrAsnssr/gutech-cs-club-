@@ -561,6 +561,11 @@ function setupAdminSettings() {
             createVote();
         });
     }
+
+    const endVoteBtn = document.getElementById('endVoteBtn');
+    if (endVoteBtn) {
+        endVoteBtn.addEventListener('click', endVote);
+    }
 }
 
 function openAdminSettingsModal() {
@@ -593,6 +598,18 @@ async function createVote() {
             console.error('Error creating vote:', error);
             showNotification('Error creating vote');
         }
+    }
+}
+
+async function endVote() {
+    try {
+        await firebase.database().ref('vote/active').set(false);
+        showNotification('Vote has been ended.');
+        closeAdminSettingsModal();
+        location.reload(); // Reload to hide the voting section
+    } catch (error) {
+        console.error('Error ending vote:', error);
+        showNotification('Error ending vote');
     }
 }
 

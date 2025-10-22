@@ -122,6 +122,7 @@ async function handleLogin() {
         await firebase.auth().signInWithEmailAndPassword(email, password);
         closeAuthModal();
         showNotification('Login successful! Welcome back!');
+        location.reload();
     } catch (error) {
         console.error('Login error:', error);
         errorDiv.textContent = getErrorMessage(error.code);
