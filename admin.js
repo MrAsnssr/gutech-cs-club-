@@ -553,6 +553,14 @@ function setupAdminSettings() {
             saveAdminSettings();
         });
     }
+
+    const createVoteForm = document.getElementById('createVoteForm');
+    if (createVoteForm) {
+        createVoteForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            createVote();
+        });
+    }
 }
 
 function openAdminSettingsModal() {
@@ -562,6 +570,29 @@ function openAdminSettingsModal() {
 
 function closeAdminSettingsModal() {
     document.getElementById('adminSettingsModal').style.display = 'none';
+}
+
+async function createVote() {
+    const question = document.getElementById('voteQuestion').value;
+    const options = document.getElementById('voteOptions').value.split(',').map(option => option.trim());
+
+    if (question && options.length > 1) {
+        try {
+            const voteRef = firebase.database().ref('vote');
+            const newVote = {
+                id: voteRef.push().key,
+                question: question,
+                options: options.map(option => ({ name: option, count: 0 })),
+                active: true
+            };
+            await voteRef.set(newVote);
+            showNotification('Vote created successfully!');
+            closeAdminSettingsModal();
+        } catch (error) {
+            console.error('Error creating vote:', error);
+            showNotification('Error creating vote');
+        }
+    }
 }
 
 async function saveAdminSettings() {
