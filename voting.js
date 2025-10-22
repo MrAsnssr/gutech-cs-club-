@@ -15,6 +15,8 @@ async function loadVote() {
         const voteData = snapshot.val();
 
         if (voteData && voteData.active) {
+            document.getElementById('voting').style.display = 'block';
+            document.getElementById('nav-vote').style.display = 'block';
             const currentUser = firebase.auth().currentUser;
             if (currentUser) {
                 const userVoteRef = firebase.database().ref(`users/${currentUser.uid}/votes/${voteData.id}`);
@@ -29,7 +31,8 @@ async function loadVote() {
                                 </div>`;
                     }).join('');
                     document.getElementById('votingOptions').innerHTML = optionsHtml;
-                    document.getElementById('votingModal').style.display = 'block';
+                } else {
+                    showVoteResults();
                 }
             }
         }
@@ -54,7 +57,6 @@ document.getElementById('castVoteBtn').addEventListener('click', async function(
                 return (currentCount || 0) + 1;
             });
 
-            closeVotingModal();
             showVoteResults();
         }
     }
@@ -71,7 +73,7 @@ async function showVoteResults() {
         const voteData = snapshot.val();
 
         if (voteData) {
-            document.getElementById('voteResultsQuestion').textContent = voteData.question;
+            document.getElementById('votingQuestion').textContent = voteData.question;
             const totalVotes = voteData.options.reduce((total, option) => total + (option.count || 0), 0);
             const resultsHtml = voteData.options.map(option => {
                 const percentage = totalVotes > 0 ? ((option.count || 0) / totalVotes) * 100 : 0;
@@ -83,18 +85,10 @@ async function showVoteResults() {
                             <div class="vote-percentage">${percentage.toFixed(1)}%</div>
                         </div>`;
             }).join('');
-            document.getElementById('voteResults').innerHTML = resultsHtml;
-            document.getElementById('voteResultsModal').style.display = 'block';
+            document.getElementById('votingOptions').innerHTML = resultsHtml;
+            document.getElementById('castVoteBtn').style.display = 'none';
         }
     } catch (error) {
         console.error('Error showing vote results:', error);
     }
-}
-
-function closeVotingModal() {
-    document.getElementById('votingModal').style.display = 'none';
-}
-
-function closeVoteResultsModal() {
-    document.getElementById('voteResultsModal').style.display = 'none';
 }

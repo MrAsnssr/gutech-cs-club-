@@ -588,6 +588,7 @@ async function createVote() {
             await voteRef.set(newVote);
             showNotification('Vote created successfully!');
             closeAdminSettingsModal();
+            loadVote();
         } catch (error) {
             console.error('Error creating vote:', error);
             showNotification('Error creating vote');
