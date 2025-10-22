@@ -130,6 +130,7 @@
                     <li><a href="#gallery" class="nav-link">Gallery</a></li>
                     <li><a href="#merch" class="nav-link">Merch</a></li>
                     <li><a href="#registration" class="nav-link">Registration</a></li>
+                    <li><a href="#voting" class="nav-link" id="nav-vote" style="display: none;">Vote</a></li>
                     <li><a href="#contact" class="nav-link">Contact</a></li>
                     <li id="loginNavItem"><a href="#" id="userAuthBtn" class="user-auth-btn">👤 Login</a></li>
                     <li id="logoutNavItem" style="display: none;"><a href="#" id="navLogoutBtn" class="logout-btn">🚪 Logout</a></li>
@@ -418,6 +419,15 @@
         </div>
     </section>
 
+    <section id="voting" class="section voting-section" style="display: none;">
+        <div class="container">
+            <h2 id="votingQuestion" class="section-title"></h2>
+            <div id="votingOptions"></div>
+            <button id="castVoteBtn" class="btn btn-primary">Cast Vote</button>
+            <div id="voteResults"></div>
+        </div>
+    </section>
+
     <footer>
         <div class="container">
             <p>&copy; 2024 GUtech Computer Science Club. All rights reserved.</p>
@@ -556,24 +566,7 @@
         </div>
     </div>
 
-    <!-- Voting Modal -->
-    <div id="votingModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeVotingModal()">&times;</span>
-            <h2 id="votingQuestion"></h2>
-            <div id="votingOptions"></div>
-            <button id="castVoteBtn" class="btn btn-primary">Cast Vote</button>
-        </div>
-    </div>
 
-    <!-- Vote Results Modal -->
-    <div id="voteResultsModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeVoteResultsModal()">&times;</span>
-            <h2 id="voteResultsQuestion"></h2>
-            <div id="voteResults"></div>
-        </div>
-    </div>
 
     <script src="firebase-config.js"></script>
     <script src="auth.js"></script>

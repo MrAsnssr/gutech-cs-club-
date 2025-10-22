@@ -1599,3 +1599,34 @@ body.light-mode .close:hover,
 body.light-mode .close:focus {
     color: #8b5cf6;
 }
+
+/* Voting Section Styles */
+.voting-section {
+    background: linear-gradient(180deg, #0a0e27 0%, #1a0f3e 100%);
+}
+
+.vote-result {
+    margin-bottom: 15px;
+}
+
+.vote-option-name {
+    margin-bottom: 5px;
+}
+
+.vote-bar-container {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+.vote-bar {
+    height: 20px;
+    background-color: #8b5cf6;
+    border-radius: 5px;
+}
+
+.vote-percentage {
+    margin-top: 5px;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+}
