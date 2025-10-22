@@ -78,11 +78,10 @@ async function showVoteResults() {
             const resultsHtml = voteData.options.map(option => {
                 const percentage = totalVotes > 0 ? ((option.count || 0) / totalVotes) * 100 : 0;
                 return `<div class="vote-result">
-                            <div class="vote-option-name">${option.name}</div>
+                            <div class="vote-option-name">${option.name} <span class="vote-percentage">${percentage.toFixed(1)}%</span></div>
                             <div class="vote-bar-container">
                                 <div class="vote-bar" style="width: ${percentage}%;"></div>
                             </div>
-                            <div class="vote-percentage">${percentage.toFixed(1)}%</div>
                         </div>`;
             }).join('');
             document.getElementById('votingOptions').innerHTML = resultsHtml;

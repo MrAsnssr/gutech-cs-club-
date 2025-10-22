@@ -1605,28 +1605,113 @@ body.light-mode .close:focus {
     background: linear-gradient(180deg, #0a0e27 0%, #1a0f3e 100%);
 }
 
+#votingOptions {
+    margin: 40px 0;
+    display: grid;
+    gap: 20px;
+}
+
+#votingOptions .form-group {
+    margin-bottom: 0;
+}
+
+#votingOptions input[type="radio"] {
+    display: none;
+}
+
+#votingOptions label {
+    display: block;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.1rem;
+}
+
+#votingOptions input[type="radio"]:checked + label {
+    background: #8b5cf6;
+    border-color: #8b5cf6;
+    color: white;
+    transform: scale(1.02);
+}
+
+#votingOptions label:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
 .vote-result {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
 }
 
 .vote-option-name {
-    margin-bottom: 5px;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
 }
 
 .vote-bar-container {
     width: 100%;
     background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
+    border-radius: 8px;
+    height: 30px;
+    overflow: hidden;
 }
 
 .vote-bar {
-    height: 20px;
-    background-color: #8b5cf6;
-    border-radius: 5px;
+    height: 100%;
+    background: linear-gradient(90deg, #8b5cf6 0%, #6366f1 100%);
+    border-radius: 8px;
+    transition: width 0.5s ease-in-out;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
 }
 
-.vote-percentage {
-    margin-top: 5px;
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.7);
+span.vote-percentage {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+#castVoteBtn {
+    margin-top: 20px;
+}
+
+#voteResults {
+    margin-top: 40px;
+}
+
+body.light-mode .voting-section {
+    background: #f0f2f5;
+}
+
+body.light-mode #votingOptions label {
+    background: #fff;
+    border-color: #ccc;
+    color: #333;
+}
+
+body.light-mode #votingOptions input[type="radio"]:checked + label {
+    background: #8b5cf6;
+    border-color: #8b5cf6;
+    color: white;
+}
+
+body.light-mode #votingOptions label:hover {
+    background: #f9fafb;
+    border-color: #bbb;
+}
+
+body.light-mode .vote-bar-container {
+    background-color: #e5e7eb;
+}
+
+body.light-mode span.vote-percentage {
+    font-weight: 500;
+    color: #333;
 }
